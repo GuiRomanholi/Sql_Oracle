@@ -1,0 +1,2762 @@
+/*
+
+Guilherme Romanholi Santos  RM: 557462
+
+Igor Werneck Jacobosque     RM: 558395
+
+Cristian Caja Rodrigues     RM: 558502
+
+*/
+
+-- DROP
+
+DROP TABLE REALIZA CASCADE CONSTRAINTS;
+
+DROP TABLE DIRIGE CASCADE CONSTRAINTS;
+
+DROP TABLE ARMAZENA CASCADE CONSTRAINTS;
+
+DROP TABLE TRABALHA CASCADE CONSTRAINTS;
+
+DROP TABLE POSSUI CASCADE CONSTRAINTS;
+
+DROP TABLE PEDIDO_FORMA_PAGAMENTO CASCADE CONSTRAINTS;
+
+DROP TABLE SERVICO_REALIZADO CASCADE CONSTRAINTS;
+
+DROP TABLE MOTORISTA CASCADE CONSTRAINTS;
+
+DROP TABLE ENDERECO CASCADE CONSTRAINTS;
+
+DROP TABLE MECANICO CASCADE CONSTRAINTS;
+
+DROP TABLE OFICINA CASCADE CONSTRAINTS;
+
+DROP TABLE FORMA_PAG CASCADE CONSTRAINTS;
+
+DROP TABLE PEDIDO CASCADE CONSTRAINTS;
+
+DROP TABLE DIAGNOSTICO CASCADE CONSTRAINTS;
+
+DROP TABLE PECA CASCADE CONSTRAINTS;
+
+DROP TABLE CARRO CASCADE CONSTRAINTS;
+
+DROP TABLE CLIENTE CASCADE CONSTRAINTS;
+
+DROP TABLE GUINCHO CASCADE CONSTRAINTS;
+
+ALTER SESSION SET NLS_DATE_FORMAT = 'dd-mm-yyyy';
+
+-- CREATE guincho
+
+CREATE TABLE GUINCHO(
+    CHASSI_GUI VARCHAR(18) CONSTRAINT GUI_CHASSI_PK PRIMARY KEY,
+    MARCA_GUI VARCHAR(29) CONSTRAINT GUI_MARCA_NN NOT NULL,
+    PLACA_GUI VARCHAR(7) CONSTRAINT GUI_PLACA_NN NOT NULL,
+    ANO_FAB_GUI NUMBER(4) CONSTRAINT GUI_ANO_FAB_NN NOT NULL
+);
+
+-- CREATE cliente
+
+CREATE TABLE CLIENTE(
+    CPF_CLIE VARCHAR(11) CONSTRAINT CLIE_CPF_PK1 PRIMARY KEY,
+    NOME_CLIE VARCHAR(60) CONSTRAINT CLIE_NOME_NN1 NOT NULL,
+    EMAIL_CLIE VARCHAR(60) CONSTRAINT CLIE_EMAIL_NN1 NOT NULL,
+    TEL_CLIE VARCHAR(20) CONSTRAINT CLIE_TEL_NN1 NOT NULL,
+    CHASSI_GUI VARCHAR(18) CONSTRAINT CLIE_CHASSI_GUI_FK1 REFERENCES GUINCHO
+);
+
+-- CREATE carro
+
+CREATE TABLE CARRO(
+    PLACA_CAR VARCHAR(7) CONSTRAINT CAR_PLACA_PK1 PRIMARY KEY,
+    COR_CAR VARCHAR(49) CONSTRAINT CAR_COR_NN1 NOT NULL,
+    MARCA_CAR VARCHAR(20) CONSTRAINT CAR_MARCA_NN1 NOT NULL,
+    MODELO_CAR VARCHAR(39) CONSTRAINT CAR_MODELO_NN1 NOT NULL,
+    CPF_CLIE VARCHAR(11) CONSTRAINT CAR_CPF_CLIE_FK1 REFERENCES CLIENTE,
+    CHASSI_GUI VARCHAR(18) CONSTRAINT CAR_CHASSI_GUI_FK REFERENCES GUINCHO
+);
+
+-- CREATE diagnostico
+
+CREATE TABLE DIAGNOSTICO(
+    ID_DIA NUMBER(38) CONSTRAINT DIA_ID_PK PRIMARY KEY,
+    DATA_DIA DATE CONSTRAINT DIA_DATA_NN NOT NULL,
+    STATUS_DIA VARCHAR(39) CONSTRAINT DIA_STATUS_NN NOT NULL
+);
+
+-- CREATE peca
+
+CREATE TABLE PECA(
+    ID_PECA NUMBER(10) CONSTRAINT PECA_ID_PK PRIMARY KEY,
+    NOME_PECA VARCHAR(50) CONSTRAINT PECA_NOME_NN NOT NULL,
+    DESC_PECA VARCHAR(200) CONSTRAINT PECA_DESC_NN NOT NULL,
+    PRECO_PECA NUMBER(10, 2) CONSTRAINT PECA_PRECO_NN NOT NULL
+);
+
+-- CREATE pedido
+
+CREATE TABLE PEDIDO(
+    NUM_PED NUMBER(10) CONSTRAINT PED_NUM_PK PRIMARY KEY,
+    TIPO_PED VARCHAR(49) CONSTRAINT PED_TIPO_NN NOT NULL,
+    DATA_PED DATE CONSTRAINT PED_DATA_NN NOT NULL,
+    CPF_CLIE VARCHAR(11) CONSTRAINT PED_CPF_CLIE_FK REFERENCES CLIENTE
+);
+
+-- CREATE forma_pag
+
+CREATE TABLE FORMA_PAG(
+    ID_FP NUMBER(10) CONSTRAINT FP_ID_PK PRIMARY KEY,
+    DATA_FP DATE CONSTRAINT FP_DATA_NN NOT NULL,
+    STATUS_FP VARCHAR(39) CONSTRAINT FP_STATUS_NN NOT NULL,
+    VALOR_FP NUMBER(10, 2) CONSTRAINT FP_VALOR_NN NOT NULL
+);
+
+-- CREATE oficina
+
+CREATE TABLE OFICINA(
+    CNPJ_OF VARCHAR(14) CONSTRAINT OF_CNPJ_PK PRIMARY KEY,
+    NOME_OF VARCHAR(60) CONSTRAINT OF_NAME_NN NOT NULL,
+    RAZAO_SOC_OF VARCHAR(30) CONSTRAINT OF_SOC_RAZAO_NN NOT NULL,
+    NUMERO_OF NUMBER(10) CONSTRAINT OF_NUMERO_NN NOT NULL
+);
+
+-- CREATE mecanico
+
+CREATE TABLE MECANICO(
+    ID_MEC NUMBER(10) CONSTRAINT MEC_ID_PK PRIMARY KEY,
+    CARGO_MEC VARCHAR(29) CONSTRAINT MEC_CARGO_NN NOT NULL,
+    NOME_MEC VARCHAR(60) CONSTRAINT MEC_NOME_NN NOT NULL
+);
+
+-- CREATE endereco
+
+CREATE TABLE ENDERECO(
+    ID_END NUMBER(38) CONSTRAINT END_ID_PK PRIMARY KEY,
+    ESTADO_END VARCHAR(49) CONSTRAINT END_ESTADO_NN NOT NULL,
+    NUMERO_END NUMBER(10) CONSTRAINT END_NUMERO_NN NOT NULL,
+    CIDADE_END VARCHAR(49) CONSTRAINT END_CIDADE_NN NOT NULL
+);
+
+-- CREATE motorista
+
+CREATE TABLE MOTORISTA(
+    ID_MOT NUMBER(10) CONSTRAINT MOT_ID_PK PRIMARY KEY,
+    CG_HORARIA VARCHAR(29) CONSTRAINT MOT_CG_HORARIA_NN NOT NULL,
+    SALARIO_MOT NUMBER(10, 2) CONSTRAINT MOT_SALARIO_NN NOT NULL,
+    NOME_MOT VARCHAR(50) CONSTRAINT MOT_NOME_NN NOT NULL
+);
+
+-- CREATE realiza
+
+CREATE TABLE REALIZA(
+    CPF_CLIE VARCHAR(11) CONSTRAINT REA_CPF_CLIE_FK REFERENCES CLIENTE,
+    ID_DIA NUMBER(38) CONSTRAINT REA_ID_DIA_FK REFERENCES DIAGNOSTICO
+);
+
+-- CREATE dirige
+
+CREATE TABLE DIRIGE(
+    ID_MOT NUMBER(10) CONSTRAINT DIR_ID_MOT_FK REFERENCES MOTORISTA,
+    CHASSI_GUI VARCHAR(18) CONSTRAINT DIR_CHASSI_GUI_FK REFERENCES GUINCHO
+);
+
+-- CREATE armazena
+
+CREATE TABLE ARMAZENA(
+    PLACA_CAR VARCHAR(7) CONSTRAINT ARM_PLACA_CAR_FK REFERENCES CARRO,
+    CNPJ_OF VARCHAR(14) CONSTRAINT ARM_CNPJ_OF_FK REFERENCES OFICINA
+);
+
+-- CREATE trabalha
+
+CREATE TABLE TRABALHA(
+    CNPJ_OF VARCHAR(14) CONSTRAINT TRA_CNPJ_OF_FK REFERENCES OFICINA,
+    ID_MEC NUMBER(10) CONSTRAINT TRA_ID_MEC_FK REFERENCES MECANICO
+);
+
+-- CREATE possui
+
+CREATE TABLE POSSUI(
+    CNPJ_OF VARCHAR(14) CONSTRAINT POSS_CNPJ_OF_FK REFERENCES OFICINA,
+    ID_END NUMBER(38) CONSTRAINT POSS_ID_END_FK REFERENCES ENDERECO
+);
+
+-- CREATE pedido_forma_pagamento
+
+CREATE TABLE PEDIDO_FORMA_PAGAMENTO(
+    NUM_PED NUMBER(10) CONSTRAINT PED_FP_NUM_PED_FK REFERENCES PEDIDO,
+    ID_FP NUMBER(10) CONSTRAINT PED_FP_ID_FP_FK REFERENCES FORMA_PAG
+);
+
+-- CREATE servico_realizado
+
+CREATE TABLE SERVICO_REALIZADO(
+    ID_SERV NUMBER(10) CONSTRAINT SERV_ID_PK PRIMARY KEY,
+    DESC_SERV VARCHAR(200) CONSTRAINT SERV_DESC_SERV_NN NOT NULL,
+    VALOR_SERV NUMBER(10, 2) CONSTRAINT SERV_VALOR_SERV_NN NOT NULL,
+    ID_DIA NUMBER(38) CONSTRAINT SERV_ID_DIA_FK REFERENCES DIAGNOSTICO,
+    ID_PECA NUMBER(10) CONSTRAINT SERV_ID_PECA_NN REFERENCES PECA
+);
+
+-- INSERT guincho
+
+INSERT INTO GUINCHO VALUES (
+    'ABC1234DEFG56789',
+    'Toyota',
+    'XYZ1234',
+    2015
+);
+
+INSERT INTO GUINCHO VALUES (
+    'DEF5678HIJK12345',
+    'Ford',
+    'ABC5678',
+    2018
+);
+
+INSERT INTO GUINCHO VALUES (
+    'GHI1234LMNO56789',
+    'Honda',
+    'LMN1234',
+    2020
+);
+
+INSERT INTO GUINCHO VALUES (
+    'JKL5678PQRS12345',
+    'Chevrolet',
+    'RST5678',
+    2012
+);
+
+INSERT INTO GUINCHO VALUES (
+    'MNO1234TUVW56789',
+    'Fiat',
+    'UVW1234',
+    2019
+);
+
+INSERT INTO GUINCHO VALUES (
+    'PQR5678XYZA12345',
+    'Nissan',
+    'XYZ5678',
+    2017
+);
+
+INSERT INTO GUINCHO VALUES (
+    'STU1234BCDE56789',
+    'Volkswagen',
+    'BCD1234',
+    2016
+);
+
+INSERT INTO GUINCHO VALUES (
+    'VWX5678FGHI12345',
+    'Hyundai',
+    'FGH5678',
+    2021
+);
+
+INSERT INTO GUINCHO VALUES (
+    'YZA1234JKLM56789',
+    'Renault',
+    'JKL1234',
+    2020
+);
+
+INSERT INTO GUINCHO VALUES (
+    'BCD5678NOPQ12345',
+    'Mitsubishi',
+    'NOP5678',
+    2022
+);
+
+INSERT INTO GUINCHO VALUES (
+    'BCD5678DEFG67890',
+    'Renault',
+    'XYZ9013',
+    2020
+);
+
+INSERT INTO GUINCHO VALUES (
+    'EFG6789HIJK67890',
+    'Toyota',
+    'ABC9013',
+    2021
+);
+
+INSERT INTO GUINCHO VALUES (
+    'FGH7890JKLM67890',
+    'Honda',
+    'LMN9013',
+    2019
+);
+
+INSERT INTO GUINCHO VALUES (
+    'GHI8901NOPQ67890',
+    'Chevrolet',
+    'RST9013',
+    2022
+);
+
+INSERT INTO GUINCHO VALUES (
+    'HIJ9012QRST67890',
+    'Fiat',
+    'UVW9013',
+    2018
+);
+
+INSERT INTO GUINCHO VALUES (
+    'JKL0123UVWX67890',
+    'Nissan',
+    'XYZ6789',
+    2022
+);
+
+INSERT INTO GUINCHO VALUES (
+    'LMN1234WXYZ67890',
+    'Volkswagen',
+    'BCD9013',
+    2020
+);
+
+INSERT INTO GUINCHO VALUES (
+    'MNO2345ABCD67890',
+    'Hyundai',
+    'FGH9013',
+    2023
+);
+
+INSERT INTO GUINCHO VALUES (
+    'NOP3456EFGH67890',
+    'Renault',
+    'JKL9013',
+    2020
+);
+
+INSERT INTO GUINCHO VALUES (
+    'PQR4567JKLM67890',
+    'Mitsubishi',
+    'NOP9013',
+    2021
+);
+
+SELECT
+    *
+FROM
+    GUINCHO;
+
+-- INSERT cliente
+
+INSERT INTO CLIENTE VALUES (
+    '12345678901',
+    'Jo�o Silva',
+    'joao@gmail.com',
+    '123456789',
+    'ABC1234DEFG56789'
+);
+
+INSERT INTO CLIENTE VALUES (
+    '23456789012',
+    'Maria Souza',
+    'maria@gmail.com',
+    '234567890',
+    'DEF5678HIJK12345'
+);
+
+INSERT INTO CLIENTE VALUES (
+    '34567890123',
+    'Pedro Santos',
+    'pedro@gmail.com',
+    '345678901',
+    'GHI1234LMNO56789'
+);
+
+INSERT INTO CLIENTE VALUES (
+    '45678901234',
+    'Ana Costa',
+    'ana@gmail.com',
+    '456789012',
+    'JKL5678PQRS12345'
+);
+
+INSERT INTO CLIENTE VALUES (
+    '56789012345',
+    'Carlos Oliveira',
+    'carlos@gmail.com',
+    '567890123',
+    'MNO1234TUVW56789'
+);
+
+INSERT INTO CLIENTE VALUES (
+    '67890123456',
+    'Paula Almeida',
+    'paula@gmail.com',
+    '678901234',
+    'PQR5678XYZA12345'
+);
+
+INSERT INTO CLIENTE VALUES (
+    '78901234567',
+    'Rafael Lima',
+    'rafael@gmail.com',
+    '789012345',
+    'STU1234BCDE56789'
+);
+
+INSERT INTO CLIENTE VALUES (
+    '89012345678',
+    'Camila Ferreira',
+    'camila@gmail.com',
+    '890123456',
+    'VWX5678FGHI12345'
+);
+
+INSERT INTO CLIENTE VALUES (
+    '90123456789',
+    'Bruno Pereira',
+    'bruno@gmail.com',
+    '901234567',
+    'YZA1234JKLM56789'
+);
+
+INSERT INTO CLIENTE VALUES (
+    '01234567890',
+    'Juliana Mendes',
+    'juliana@gmail.com',
+    '012345678',
+    'BCD5678NOPQ12345'
+);
+
+INSERT INTO CLIENTE VALUES (
+    '11223344556',
+    'Ricardo Almeida',
+    'ricardo.almeida@gmail.com',
+    '1122334455',
+    'ABC1234DEFG56789'
+);
+
+INSERT INTO CLIENTE VALUES (
+    '22334455667',
+    'Sofia Santos',
+    'sofia.santos@gmail.com',
+    '2233445566',
+    'DEF5678HIJK12345'
+);
+
+INSERT INTO CLIENTE VALUES (
+    '33445566778',
+    'Felipe Lima',
+    'felipe.lima@gmail.com',
+    '3344556677',
+    'GHI1234LMNO56789'
+);
+
+INSERT INTO CLIENTE VALUES (
+    '44556677889',
+    'Tatiane Costa',
+    'tatiane.costa@gmail.com',
+    '4455667788',
+    'JKL5678PQRS12345'
+);
+
+INSERT INTO CLIENTE VALUES (
+    '55667788990',
+    'Marcos Ferreira',
+    'marcos.ferreira@gmail.com',
+    '5566778899',
+    'MNO1234TUVW56789'
+);
+
+INSERT INTO CLIENTE VALUES (
+    '66778899001',
+    'Jessica Martins',
+    'jessica.martins@gmail.com',
+    '6677889900',
+    'PQR5678XYZA12345'
+);
+
+INSERT INTO CLIENTE VALUES (
+    '77889900112',
+    'Thiago Rocha',
+    'thiago.rocha@gmail.com',
+    '7788990011',
+    'STU1234BCDE56789'
+);
+
+INSERT INTO CLIENTE VALUES (
+    '88990011223',
+    'Camila Almeida',
+    'camila.almeida@gmail.com',
+    '8899001122',
+    'VWX5678FGHI12345'
+);
+
+INSERT INTO CLIENTE VALUES (
+    '99001122334',
+    'Rafael Santos',
+    'rafael.santos@gmail.com',
+    '9900112233',
+    'YZA1234JKLM56789'
+);
+
+INSERT INTO CLIENTE VALUES (
+    '10111213141',
+    'Lucas Oliveira',
+    'lucas.oliveira@gmail.com',
+    '1011121314',
+    'BCD5678NOPQ12345'
+);
+
+SELECT
+    *
+FROM
+    CLIENTE;
+
+-- INSERT carro
+
+INSERT INTO CARRO VALUES (
+    'XYZ1234',
+    'Preto',
+    'Toyota',
+    'Corolla',
+    '12345678901',
+    'ABC1234DEFG56789'
+);
+
+INSERT INTO CARRO VALUES (
+    'ABC5678',
+    'Branco',
+    'Ford',
+    'Fiesta',
+    '23456789012',
+    'DEF5678HIJK12345'
+);
+
+INSERT INTO CARRO VALUES (
+    'LMN1234',
+    'Cinza',
+    'Honda',
+    'Civic',
+    '34567890123',
+    'GHI1234LMNO56789'
+);
+
+INSERT INTO CARRO VALUES (
+    'RST5678',
+    'Vermelho',
+    'Chevrolet',
+    'Onix',
+    '45678901234',
+    'JKL5678PQRS12345'
+);
+
+INSERT INTO CARRO VALUES (
+    'UVW1234',
+    'Azul',
+    'Fiat',
+    'Uno',
+    '56789012345',
+    'MNO1234TUVW56789'
+);
+
+INSERT INTO CARRO VALUES (
+    'XYZ5678',
+    'Prata',
+    'Nissan',
+    'Versa',
+    '67890123456',
+    'PQR5678XYZA12345'
+);
+
+INSERT INTO CARRO VALUES (
+    'BCD1234',
+    'Verde',
+    'Volkswagen',
+    'Golf',
+    '78901234567',
+    'STU1234BCDE56789'
+);
+
+INSERT INTO CARRO VALUES (
+    'FGH5678',
+    'Amarelo',
+    'Hyundai',
+    'HB20',
+    '89012345678',
+    'VWX5678FGHI12345'
+);
+
+INSERT INTO CARRO VALUES (
+    'JKL1234',
+    'Roxo',
+    'Renault',
+    'Sandero',
+    '90123456789',
+    'YZA1234JKLM56789'
+);
+
+INSERT INTO CARRO VALUES (
+    'NOP5678',
+    'Marrom',
+    'Mitsubishi',
+    'Outlander',
+    '01234567890',
+    'BCD5678NOPQ12345'
+);
+
+INSERT INTO CARRO VALUES (
+    'XYZ9013',
+    'Preto',
+    'Renault',
+    'Sandero',
+    '11223344556',
+    'BCD5678DEFG67890'
+);
+
+INSERT INTO CARRO VALUES (
+    'ABC9013',
+    'Branco',
+    'Toyota',
+    'Corolla',
+    '22334455667',
+    'EFG6789HIJK67890'
+);
+
+INSERT INTO CARRO VALUES (
+    'DEF9013',
+    'Cinza',
+    'Honda',
+    'Civic',
+    '33445566778',
+    'FGH7890JKLM67890'
+);
+
+INSERT INTO CARRO VALUES (
+    'GHI9013',
+    'Vermelho',
+    'Chevrolet',
+    'Onix',
+    '44556677889',
+    'GHI8901NOPQ67890'
+);
+
+INSERT INTO CARRO VALUES (
+    'JKL9013',
+    'Azul',
+    'Fiat',
+    'Uno',
+    '55667788990',
+    'HIJ9012QRST67890'
+);
+
+INSERT INTO CARRO VALUES (
+    'MNO9013',
+    'Prata',
+    'Nissan',
+    'Versa',
+    '66778899001',
+    'JKL0123UVWX67890'
+);
+
+INSERT INTO CARRO VALUES (
+    'PQR9013',
+    'Verde',
+    'Volkswagen',
+    'Golf',
+    '77889900112',
+    'LMN1234WXYZ67890'
+);
+
+INSERT INTO CARRO VALUES (
+    'STU9013',
+    'Amarelo',
+    'Hyundai',
+    'HB20',
+    '88990011223',
+    'MNO2345ABCD67890'
+);
+
+INSERT INTO CARRO VALUES (
+    'VWX9013',
+    'Roxo',
+    'Renault',
+    'Captur',
+    '99001122334',
+    'NOP3456EFGH67890'
+);
+
+INSERT INTO CARRO VALUES (
+    'YZA9013',
+    'Marrom',
+    'Mitsubishi',
+    'Outlander',
+    '10111213141',
+    'PQR4567JKLM67890'
+);
+
+SELECT
+    *
+FROM
+    CARRO;
+
+-- INSERT diagnostico
+
+INSERT INTO DIAGNOSTICO VALUES (
+    1,
+    TO_DATE('01-01-2024', 'DD-MM-YYYY'),
+    'Em andamento'
+);
+
+INSERT INTO DIAGNOSTICO VALUES (
+    2,
+    TO_DATE('02-02-2024', 'DD-MM-YYYY'),
+    'Conclu�do'
+);
+
+INSERT INTO DIAGNOSTICO VALUES (
+    3,
+    TO_DATE('03-03-2024', 'DD-MM-YYYY'),
+    'Aguardando pe�as'
+);
+
+INSERT INTO DIAGNOSTICO VALUES (
+    4,
+    TO_DATE('04-04-2024', 'DD-MM-YYYY'),
+    'Em andamento'
+);
+
+INSERT INTO DIAGNOSTICO VALUES (
+    5,
+    TO_DATE('05-05-2024', 'DD-MM-YYYY'),
+    'Cancelado'
+);
+
+INSERT INTO DIAGNOSTICO VALUES (
+    6,
+    TO_DATE('06-06-2024', 'DD-MM-YYYY'),
+    'Conclu�do'
+);
+
+INSERT INTO DIAGNOSTICO VALUES (
+    7,
+    TO_DATE('07-07-2024', 'DD-MM-YYYY'),
+    'Em andamento'
+);
+
+INSERT INTO DIAGNOSTICO VALUES (
+    8,
+    TO_DATE('08-08-2024', 'DD-MM-YYYY'),
+    'Aguardando pe�as'
+);
+
+INSERT INTO DIAGNOSTICO VALUES (
+    9,
+    TO_DATE('09-09-2024', 'DD-MM-YYYY'),
+    'Conclu�do'
+);
+
+INSERT INTO DIAGNOSTICO VALUES (
+    10,
+    TO_DATE('10-10-2024', 'DD-MM-YYYY'),
+    'Cancelado'
+);
+
+INSERT INTO DIAGNOSTICO VALUES (
+    11,
+    TO_DATE('21-09-2024', 'DD-MM-YYYY'),
+    'Em andamento'
+);
+
+INSERT INTO DIAGNOSTICO VALUES (
+    12,
+    TO_DATE('22-10-2024', 'DD-MM-YYYY'),
+    'Conclu�do'
+);
+
+INSERT INTO DIAGNOSTICO VALUES (
+    13,
+    TO_DATE('23-11-2024', 'DD-MM-YYYY'),
+    'Aguardando pe�as'
+);
+
+INSERT INTO DIAGNOSTICO VALUES (
+    14,
+    TO_DATE('24-12-2024', 'DD-MM-YYYY'),
+    'Em andamento'
+);
+
+INSERT INTO DIAGNOSTICO VALUES (
+    15,
+    TO_DATE('25-01-2025', 'DD-MM-YYYY'),
+    'Cancelado'
+);
+
+INSERT INTO DIAGNOSTICO VALUES (
+    16,
+    TO_DATE('26-02-2025', 'DD-MM-YYYY'),
+    'Conclu�do'
+);
+
+INSERT INTO DIAGNOSTICO VALUES (
+    17,
+    TO_DATE('27-03-2025', 'DD-MM-YYYY'),
+    'Em andamento'
+);
+
+INSERT INTO DIAGNOSTICO VALUES (
+    18,
+    TO_DATE('28-04-2025', 'DD-MM-YYYY'),
+    'Aguardando pe�as'
+);
+
+INSERT INTO DIAGNOSTICO VALUES (
+    19,
+    TO_DATE('29-05-2025', 'DD-MM-YYYY'),
+    'Conclu�do'
+);
+
+INSERT INTO DIAGNOSTICO VALUES (
+    20,
+    TO_DATE('30-06-2025', 'DD-MM-YYYY'),
+    'Cancelado'
+);
+
+SELECT
+    *
+FROM
+    DIAGNOSTICO;
+
+-- INSERT pedido
+
+INSERT INTO PEDIDO VALUES (
+    1,
+    'Servi�o',
+    TO_DATE('01-01-2024', 'DD-MM-YYYY'),
+    '12345678901'
+);
+
+INSERT INTO PEDIDO VALUES (
+    2,
+    'Pe�a',
+    TO_DATE('02-02-2024', 'DD-MM-YYYY'),
+    '23456789012'
+);
+
+INSERT INTO PEDIDO VALUES (
+    3,
+    'Servi�o',
+    TO_DATE('03-03-2024', 'DD-MM-YYYY'),
+    '34567890123'
+);
+
+INSERT INTO PEDIDO VALUES (
+    4,
+    'Pe�a',
+    TO_DATE('04-04-2024', 'DD-MM-YYYY'),
+    '45678901234'
+);
+
+INSERT INTO PEDIDO VALUES (
+    5,
+    'Servi�o',
+    TO_DATE('05-05-2024', 'DD-MM-YYYY'),
+    '56789012345'
+);
+
+INSERT INTO PEDIDO VALUES (
+    6,
+    'Pe�a',
+    TO_DATE('06-06-2024', 'DD-MM-YYYY'),
+    '67890123456'
+);
+
+INSERT INTO PEDIDO VALUES (
+    7,
+    'Servi�o',
+    TO_DATE('07-07-2024', 'DD-MM-YYYY'),
+    '78901234567'
+);
+
+INSERT INTO PEDIDO VALUES (
+    8,
+    'Pe�a',
+    TO_DATE('08-08-2024', 'DD-MM-YYYY'),
+    '89012345678'
+);
+
+INSERT INTO PEDIDO VALUES (
+    9,
+    'Servi�o',
+    TO_DATE('09-09-2024', 'DD-MM-YYYY'),
+    '90123456789'
+);
+
+INSERT INTO PEDIDO VALUES (
+    10,
+    'Pe�a',
+    TO_DATE('10-10-2024', 'DD-MM-YYYY'),
+    '01234567890'
+);
+
+INSERT INTO PEDIDO VALUES (
+    11,
+    'Servi�o',
+    TO_DATE('01-07-2024', 'DD-MM-YYYY'),
+    '11223344556'
+);
+
+INSERT INTO PEDIDO VALUES (
+    12,
+    'Pe�a',
+    TO_DATE('02-08-2024', 'DD-MM-YYYY'),
+    '22334455667'
+);
+
+INSERT INTO PEDIDO VALUES (
+    13,
+    'Servi�o',
+    TO_DATE('03-09-2024', 'DD-MM-YYYY'),
+    '33445566778'
+);
+
+INSERT INTO PEDIDO VALUES (
+    14,
+    'Pe�a',
+    TO_DATE('04-10-2024', 'DD-MM-YYYY'),
+    '44556677889'
+);
+
+INSERT INTO PEDIDO VALUES (
+    15,
+    'Servi�o',
+    TO_DATE('05-11-2024', 'DD-MM-YYYY'),
+    '55667788990'
+);
+
+INSERT INTO PEDIDO VALUES (
+    16,
+    'Pe�a',
+    TO_DATE('06-12-2024', 'DD-MM-YYYY'),
+    '66778899001'
+);
+
+INSERT INTO PEDIDO VALUES (
+    17,
+    'Servi�o',
+    TO_DATE('07-01-2025', 'DD-MM-YYYY'),
+    '77889900112'
+);
+
+INSERT INTO PEDIDO VALUES (
+    18,
+    'Pe�a',
+    TO_DATE('08-02-2025', 'DD-MM-YYYY'),
+    '88990011223'
+);
+
+INSERT INTO PEDIDO VALUES (
+    19,
+    'Servi�o',
+    TO_DATE('09-03-2025', 'DD-MM-YYYY'),
+    '99001122334'
+);
+
+INSERT INTO PEDIDO VALUES (
+    20,
+    'Pe�a',
+    TO_DATE('10-04-2025', 'DD-MM-YYYY'),
+    '10111213141'
+);
+
+SELECT
+    *
+FROM
+    PEDIDO;
+
+-- INSERT forma_pag
+
+INSERT INTO FORMA_PAG VALUES (
+    1,
+    TO_DATE('01-01-2024', 'DD-MM-YYYY'),
+    'Pago',
+    500.00
+);
+
+INSERT INTO FORMA_PAG VALUES (
+    2,
+    TO_DATE('02-02-2024', 'DD-MM-YYYY'),
+    'Pendente',
+    300.00
+);
+
+INSERT INTO FORMA_PAG VALUES (
+    3,
+    TO_DATE('03-03-2024', 'DD-MM-YYYY'),
+    'Cancelado',
+    0.00
+);
+
+INSERT INTO FORMA_PAG VALUES (
+    4,
+    TO_DATE('04-04-2024', 'DD-MM-YYYY'),
+    'Pago',
+    700.00
+);
+
+INSERT INTO FORMA_PAG VALUES (
+    5,
+    TO_DATE('05-05-2024', 'DD-MM-YYYY'),
+    'Pendente',
+    400.00
+);
+
+INSERT INTO FORMA_PAG VALUES (
+    6,
+    TO_DATE('06-06-2024', 'DD-MM-YYYY'),
+    'Pago',
+    600.00
+);
+
+INSERT INTO FORMA_PAG VALUES (
+    7,
+    TO_DATE('07-07-2024', 'DD-MM-YYYY'),
+    'Cancelado',
+    0.00
+);
+
+INSERT INTO FORMA_PAG VALUES (
+    8,
+    TO_DATE('08-08-2024', 'DD-MM-YYYY'),
+    'Pendente',
+    200.00
+);
+
+INSERT INTO FORMA_PAG VALUES (
+    9,
+    TO_DATE('09-09-2024', 'DD-MM-YYYY'),
+    'Pago',
+    800.00
+);
+
+INSERT INTO FORMA_PAG VALUES (
+    10,
+    TO_DATE('10-10-2024', 'DD-MM-YYYY'),
+    'Pendente',
+    100.00
+);
+
+INSERT INTO FORMA_PAG VALUES (
+    11,
+    TO_DATE('01-01-2025', 'DD-MM-YYYY'),
+    'Pago',
+    500.00
+);
+
+INSERT INTO FORMA_PAG VALUES (
+    12,
+    TO_DATE('02-02-2025', 'DD-MM-YYYY'),
+    'Pendente',
+    300.00
+);
+
+INSERT INTO FORMA_PAG VALUES (
+    13,
+    TO_DATE('03-03-2025', 'DD-MM-YYYY'),
+    'Cancelado',
+    0.00
+);
+
+INSERT INTO FORMA_PAG VALUES (
+    14,
+    TO_DATE('04-04-2025', 'DD-MM-YYYY'),
+    'Pago',
+    700.00
+);
+
+INSERT INTO FORMA_PAG VALUES (
+    15,
+    TO_DATE('05-05-2025', 'DD-MM-YYYY'),
+    'Pendente',
+    400.00
+);
+
+INSERT INTO FORMA_PAG VALUES (
+    16,
+    TO_DATE('06-06-2025', 'DD-MM-YYYY'),
+    'Pago',
+    600.00
+);
+
+INSERT INTO FORMA_PAG VALUES (
+    17,
+    TO_DATE('07-07-2025', 'DD-MM-YYYY'),
+    'Cancelado',
+    0.00
+);
+
+INSERT INTO FORMA_PAG VALUES (
+    18,
+    TO_DATE('08-08-2025', 'DD-MM-YYYY'),
+    'Pendente',
+    200.00
+);
+
+INSERT INTO FORMA_PAG VALUES (
+    19,
+    TO_DATE('09-09-2025', 'DD-MM-YYYY'),
+    'Pago',
+    800.00
+);
+
+INSERT INTO FORMA_PAG VALUES (
+    20,
+    TO_DATE('10-10-2025', 'DD-MM-YYYY'),
+    'Pendente',
+    100.00
+);
+
+SELECT
+    *
+FROM
+    FORMA_PAG;
+
+-- INSERT oficina
+
+INSERT INTO OFICINA VALUES (
+    '12345678000199',
+    'Oficina do Jo�o',
+    'Jo�o Ltda',
+    100
+);
+
+INSERT INTO OFICINA VALUES (
+    '23456789000188',
+    'Oficina do Roberto',
+    'Maria Ltda',
+    101
+);
+
+INSERT INTO OFICINA VALUES (
+    '34567890000177',
+    'Oficina do Pedro',
+    'Pedro Ltda',
+    102
+);
+
+INSERT INTO OFICINA VALUES (
+    '45678900000166',
+    'Oficina da Ana',
+    'Ana Ltda',
+    103
+);
+
+INSERT INTO OFICINA VALUES (
+    '56789010000155',
+    'Oficina do Carlos',
+    'Carlos Ltda',
+    104
+);
+
+INSERT INTO OFICINA VALUES (
+    '67890120000144',
+    'Oficina da Paula',
+    'Paula Ltda',
+    105
+);
+
+INSERT INTO OFICINA VALUES (
+    '78901230000133',
+    'Oficina do Rafael',
+    'Rafael Ltda',
+    106
+);
+
+INSERT INTO OFICINA VALUES (
+    '89012340000122',
+    'Oficina da Camila',
+    'Camila Ltda',
+    107
+);
+
+INSERT INTO OFICINA VALUES (
+    '90123450000111',
+    'Oficina do Bruno',
+    'Bruno Ltda',
+    108
+);
+
+INSERT INTO OFICINA VALUES (
+    '01234560000100',
+    'Oficina da Juliana',
+    'Juliana Ltda',
+    109
+);
+
+INSERT INTO OFICINA VALUES (
+    '09876543000111',
+    'Oficina do Ricardo',
+    'Ricardo Ltda',
+    121
+);
+
+INSERT INTO OFICINA VALUES (
+    '98765432000122',
+    'Oficina da Sofia',
+    'Sofia Ltda',
+    122
+);
+
+INSERT INTO OFICINA VALUES (
+    '87654321000133',
+    'Oficina do Felipe',
+    'Felipe Ltda',
+    123
+);
+
+INSERT INTO OFICINA VALUES (
+    '76543210000144',
+    'Oficina da Tatiane',
+    'Tatiane Ltda',
+    124
+);
+
+INSERT INTO OFICINA VALUES (
+    '65432100000155',
+    'Oficina do Marcos',
+    'Marcos Ltda',
+    125
+);
+
+INSERT INTO OFICINA VALUES (
+    '54321000000166',
+    'Oficina da Jessica',
+    'Jessica Ltda',
+    126
+);
+
+INSERT INTO OFICINA VALUES (
+    '43210000000177',
+    'Oficina do Thiago',
+    'Thiago Ltda',
+    127
+);
+
+INSERT INTO OFICINA VALUES (
+    '32100000000188',
+    'Oficina da Camila',
+    'Camila Ltda',
+    128
+);
+
+INSERT INTO OFICINA VALUES (
+    '21000000000199',
+    'Oficina do Rafael',
+    'Rafael Ltda',
+    129
+);
+
+INSERT INTO OFICINA VALUES (
+    '10987654000100',
+    'Oficina do Lucas',
+    'Lucas Ltda',
+    130
+);
+
+SELECT
+    *
+FROM
+    OFICINA;
+
+-- INSERT mecanico
+
+INSERT INTO MECANICO VALUES (
+    1,
+    'Chefe de Oficina',
+    'Jo�o Silva'
+);
+
+INSERT INTO MECANICO VALUES (
+    2,
+    'Mec�nico',
+    'Pedro Souza'
+);
+
+INSERT INTO MECANICO VALUES (
+    3,
+    'Eletricista',
+    'Carlos Almeida'
+);
+
+INSERT INTO MECANICO VALUES (
+    4,
+    'Pintor',
+    'Rafael Lima'
+);
+
+INSERT INTO MECANICO VALUES (
+    5,
+    'Montador',
+    'Bruno Mendes'
+);
+
+INSERT INTO MECANICO VALUES (
+    6,
+    'Chefe de Oficina',
+    'Ana Oliveira'
+);
+
+INSERT INTO MECANICO VALUES (
+    7,
+    'Mec�nico',
+    'Juliana Costa'
+);
+
+INSERT INTO MECANICO VALUES (
+    8,
+    'Eletricista',
+    'Paulo Ferreira'
+);
+
+INSERT INTO MECANICO VALUES (
+    9,
+    'Pintor',
+    'Camila Santos'
+);
+
+INSERT INTO MECANICO VALUES (
+    10,
+    'Montador',
+    'Fernando Lopes'
+);
+
+INSERT INTO MECANICO VALUES (
+    21,
+    'Chefe de Oficina',
+    'Ricardo Almeida'
+);
+
+INSERT INTO MECANICO VALUES (
+    22,
+    'Mec�nico',
+    'Sofia Santos'
+);
+
+INSERT INTO MECANICO VALUES (
+    23,
+    'Eletricista',
+    'Felipe Lima'
+);
+
+INSERT INTO MECANICO VALUES (
+    24,
+    'Pintor',
+    'Tatiane Costa'
+);
+
+INSERT INTO MECANICO VALUES (
+    25,
+    'Montador',
+    'Marcos Ferreira'
+);
+
+INSERT INTO MECANICO VALUES (
+    26,
+    'Chefe de Oficina',
+    'Jessica Martins'
+);
+
+INSERT INTO MECANICO VALUES (
+    27,
+    'Mec�nico',
+    'Thiago Rocha'
+);
+
+INSERT INTO MECANICO VALUES (
+    28,
+    'Eletricista',
+    'Larissa Alves'
+);
+
+INSERT INTO MECANICO VALUES (
+    29,
+    'Pintor',
+    'Gabriel Nunes'
+);
+
+INSERT INTO MECANICO VALUES (
+    30,
+    'Montador',
+    'Fernanda Pinto'
+);
+
+SELECT
+    *
+FROM
+    MECANICO;
+
+-- INSERT endereco
+
+INSERT INTO ENDERECO VALUES (
+    1,
+    'S�o Paulo',
+    123,
+    'S�o Paulo'
+);
+
+INSERT INTO ENDERECO VALUES (
+    2,
+    'Rio de Janeiro',
+    456,
+    'Rio de Janeiro'
+);
+
+INSERT INTO ENDERECO VALUES (
+    3,
+    'Minas Gerais',
+    789,
+    'Belo Horizonte'
+);
+
+INSERT INTO ENDERECO VALUES (
+    4,
+    'Bahia',
+    101,
+    'Salvador'
+);
+
+INSERT INTO ENDERECO VALUES (
+    5,
+    'Paran�',
+    202,
+    'Curitiba'
+);
+
+INSERT INTO ENDERECO VALUES (
+    6,
+    'Santa Catarina',
+    303,
+    'Florian�polis'
+);
+
+INSERT INTO ENDERECO VALUES (
+    7,
+    'Rio Grande do Sul',
+    404,
+    'Porto Alegre'
+);
+
+INSERT INTO ENDERECO VALUES (
+    8,
+    'Pernambuco',
+    505,
+    'Recife'
+);
+
+INSERT INTO ENDERECO VALUES (
+    9,
+    'Cear�',
+    606,
+    'Fortaleza'
+);
+
+INSERT INTO ENDERECO VALUES (
+    10,
+    'Distrito Federal',
+    707,
+    'Bras�lia'
+);
+
+INSERT INTO ENDERECO VALUES (
+    11,
+    'S�o Paulo',
+    123,
+    'S�o Paulo'
+);
+
+INSERT INTO ENDERECO VALUES (
+    12,
+    'Rio de Janeiro',
+    456,
+    'Rio de Janeiro'
+);
+
+INSERT INTO ENDERECO VALUES (
+    13,
+    'Minas Gerais',
+    789,
+    'Belo Horizonte'
+);
+
+INSERT INTO ENDERECO VALUES (
+    14,
+    'Bahia',
+    101,
+    'Salvador'
+);
+
+INSERT INTO ENDERECO VALUES (
+    15,
+    'Paran�',
+    202,
+    'Curitiba'
+);
+
+INSERT INTO ENDERECO VALUES (
+    16,
+    'Santa Catarina',
+    303,
+    'Florian�polis'
+);
+
+INSERT INTO ENDERECO VALUES (
+    17,
+    'Rio Grande do Sul',
+    404,
+    'Porto Alegre'
+);
+
+INSERT INTO ENDERECO VALUES (
+    18,
+    'Pernambuco',
+    505,
+    'Recife'
+);
+
+INSERT INTO ENDERECO VALUES (
+    19,
+    'Cear�',
+    606,
+    'Fortaleza'
+);
+
+INSERT INTO ENDERECO VALUES (
+    20,
+    'Distrito Federal',
+    707,
+    'Bras�lia'
+);
+
+SELECT
+    *
+FROM
+    ENDERECO;
+
+-- INSERT motorista
+
+INSERT INTO MOTORISTA VALUES (
+    1,
+    'Horista',
+    3000.00,
+    'Pedro Almeida'
+);
+
+INSERT INTO MOTORISTA VALUES (
+    2,
+    'Mensalista',
+    4000.00,
+    'Ana Oliveira'
+);
+
+INSERT INTO MOTORISTA VALUES (
+    3,
+    'Horista',
+    3500.00,
+    'Carlos Silva'
+);
+
+INSERT INTO MOTORISTA VALUES (
+    4,
+    'Mensalista',
+    4500.00,
+    'Juliana Costa'
+);
+
+INSERT INTO MOTORISTA VALUES (
+    5,
+    'Horista',
+    3200.00,
+    'Rafael Lima'
+);
+
+INSERT INTO MOTORISTA VALUES (
+    6,
+    'Mensalista',
+    4200.00,
+    'Bruno Pereira'
+);
+
+INSERT INTO MOTORISTA VALUES (
+    7,
+    'Horista',
+    3100.00,
+    'Fernanda Souza'
+);
+
+INSERT INTO MOTORISTA VALUES (
+    8,
+    'Mensalista',
+    4600.00,
+    'Lucas Ferreira'
+);
+
+INSERT INTO MOTORISTA VALUES (
+    9,
+    'Horista',
+    3300.00,
+    'Mariana Rocha'
+);
+
+INSERT INTO MOTORISTA VALUES (
+    10,
+    'Mensalista',
+    4800.00,
+    'Roberto Dias'
+);
+
+INSERT INTO MOTORISTA VALUES (
+    21,
+    'Horista',
+    3500.00,
+    'Gustavo Lima'
+);
+
+INSERT INTO MOTORISTA VALUES (
+    22,
+    'Mensalista',
+    4600.00,
+    'Fabiana Santos'
+);
+
+INSERT INTO MOTORISTA VALUES (
+    23,
+    'Horista',
+    3700.00,
+    'Marcio Ribeiro'
+);
+
+INSERT INTO MOTORISTA VALUES (
+    24,
+    'Mensalista',
+    4800.00,
+    'Fernanda Almeida'
+);
+
+INSERT INTO MOTORISTA VALUES (
+    25,
+    'Horista',
+    3900.00,
+    'Vitor Hugo'
+);
+
+INSERT INTO MOTORISTA VALUES (
+    26,
+    'Mensalista',
+    5000.00,
+    'Leticia Ferreira'
+);
+
+INSERT INTO MOTORISTA VALUES (
+    27,
+    'Horista',
+    4100.00,
+    'Robson Oliveira'
+);
+
+INSERT INTO MOTORISTA VALUES (
+    28,
+    'Mensalista',
+    5300.00,
+    'Cristiane Nunes'
+);
+
+INSERT INTO MOTORISTA VALUES (
+    29,
+    'Horista',
+    4300.00,
+    'Cecilia Pinto'
+);
+
+INSERT INTO MOTORISTA VALUES (
+    30,
+    'Mensalista',
+    5500.00,
+    'Diego Costa'
+);
+
+SELECT
+    *
+FROM
+    MOTORISTA;
+
+-- INSERT peca
+
+INSERT INTO PECA VALUES (
+    1,
+    'Filtro de �leo',
+    'Filtro de �leo para motor',
+    30.00
+);
+
+INSERT INTO PECA VALUES (
+    2,
+    'Pastilha de freio',
+    'Pastilha de freio dianteira',
+    150.00
+);
+
+INSERT INTO PECA VALUES (
+    3,
+    'Correia dentada',
+    'Correia dentada para motor',
+    100.00
+);
+
+INSERT INTO PECA VALUES (
+    4,
+    'Amortecedor',
+    'Amortecedor traseiro',
+    250.00
+);
+
+INSERT INTO PECA VALUES (
+    5,
+    'Velas de igni��o',
+    'Velas de igni��o para motor',
+    40.00
+);
+
+INSERT INTO PECA VALUES (
+    6,
+    'Disco de freio',
+    'Disco de freio dianteiro',
+    200.00
+);
+
+INSERT INTO PECA VALUES (
+    7,
+    'Filtro de ar',
+    'Filtro de ar para motor',
+    35.00
+);
+
+INSERT INTO PECA VALUES (
+    8,
+    'Bateria',
+    'Bateria automotiva 60Ah',
+    400.00
+);
+
+INSERT INTO PECA VALUES (
+    9,
+    'Radiador',
+    'Radiador de arrefecimento',
+    500.00
+);
+
+INSERT INTO PECA VALUES (
+    10,
+    'Pneu',
+    'Pneu 175/70 R14',
+    250.00
+);
+
+INSERT INTO PECA VALUES (
+    11,
+    'Filtro de ar',
+    'Filtro de ar para motor',
+    30.00
+);
+
+INSERT INTO PECA VALUES (
+    12,
+    'Pastilha de freio',
+    'Pastilha de freio traseira',
+    150.00
+);
+
+INSERT INTO PECA VALUES (
+    13,
+    'Correia do alternador',
+    'Correia do alternador para motor',
+    100.00
+);
+
+INSERT INTO PECA VALUES (
+    14,
+    'Amortecedor dianteiro',
+    'Amortecedor dianteiro',
+    250.00
+);
+
+INSERT INTO PECA VALUES (
+    15,
+    'Velas de igni��o',
+    'Velas de igni��o de alta performance',
+    40.00
+);
+
+INSERT INTO PECA VALUES (
+    16,
+    'Disco de freio traseiro',
+    'Disco de freio traseiro',
+    200.00
+);
+
+INSERT INTO PECA VALUES (
+    17,
+    'Filtro de combust�vel',
+    'Filtro de combust�vel para motor',
+    35.00
+);
+
+INSERT INTO PECA VALUES (
+    18,
+    'Bateria',
+    'Bateria automotiva 75Ah',
+    400.00
+);
+
+INSERT INTO PECA VALUES (
+    19,
+    'Radiador',
+    'Radiador para arrefecimento',
+    500.00
+);
+
+INSERT INTO PECA VALUES (
+    20,
+    'Pneu',
+    'Pneu 195/65 R15',
+    250.00
+);
+
+SELECT
+    *
+FROM
+    PECA;
+
+-- INSERT realiza
+
+INSERT INTO REALIZA VALUES (
+    '12345678901',
+    1
+);
+
+INSERT INTO REALIZA VALUES (
+    '23456789012',
+    2
+);
+
+INSERT INTO REALIZA VALUES (
+    '34567890123',
+    3
+);
+
+INSERT INTO REALIZA VALUES (
+    '45678901234',
+    4
+);
+
+INSERT INTO REALIZA VALUES (
+    '56789012345',
+    5
+);
+
+INSERT INTO REALIZA VALUES (
+    '67890123456',
+    6
+);
+
+INSERT INTO REALIZA VALUES (
+    '78901234567',
+    7
+);
+
+INSERT INTO REALIZA VALUES (
+    '89012345678',
+    8
+);
+
+INSERT INTO REALIZA VALUES (
+    '90123456789',
+    9
+);
+
+INSERT INTO REALIZA VALUES (
+    '01234567890',
+    10
+);
+
+INSERT INTO REALIZA VALUES (
+    '11223344556',
+    11
+);
+
+INSERT INTO REALIZA VALUES (
+    '22334455667',
+    12
+);
+
+INSERT INTO REALIZA VALUES (
+    '33445566778',
+    13
+);
+
+INSERT INTO REALIZA VALUES (
+    '44556677889',
+    14
+);
+
+INSERT INTO REALIZA VALUES (
+    '55667788990',
+    15
+);
+
+INSERT INTO REALIZA VALUES (
+    '66778899001',
+    16
+);
+
+INSERT INTO REALIZA VALUES (
+    '77889900112',
+    17
+);
+
+INSERT INTO REALIZA VALUES (
+    '88990011223',
+    18
+);
+
+INSERT INTO REALIZA VALUES (
+    '99001122334',
+    19
+);
+
+INSERT INTO REALIZA VALUES (
+    '10111213141',
+    20
+);
+
+SELECT
+    *
+FROM
+    REALIZA;
+
+-- INSERT dirige
+
+INSERT INTO DIRIGE VALUES (
+    1,
+    'ABC1234DEFG56789'
+);
+
+INSERT INTO DIRIGE VALUES (
+    2,
+    'DEF5678HIJK12345'
+);
+
+INSERT INTO DIRIGE VALUES (
+    3,
+    'GHI1234LMNO56789'
+);
+
+INSERT INTO DIRIGE VALUES (
+    4,
+    'JKL5678PQRS12345'
+);
+
+INSERT INTO DIRIGE VALUES (
+    5,
+    'MNO1234TUVW56789'
+);
+
+INSERT INTO DIRIGE VALUES (
+    6,
+    'PQR5678XYZA12345'
+);
+
+INSERT INTO DIRIGE VALUES (
+    7,
+    'STU1234BCDE56789'
+);
+
+INSERT INTO DIRIGE VALUES (
+    8,
+    'VWX5678FGHI12345'
+);
+
+INSERT INTO DIRIGE VALUES (
+    9,
+    'YZA1234JKLM56789'
+);
+
+INSERT INTO DIRIGE VALUES (
+    10,
+    'BCD5678NOPQ12345'
+);
+
+INSERT INTO DIRIGE VALUES (
+    21,
+    'BCD5678DEFG67890'
+);
+
+INSERT INTO DIRIGE VALUES (
+    22,
+    'EFG6789HIJK67890'
+);
+
+INSERT INTO DIRIGE VALUES (
+    23,
+    'FGH7890JKLM67890'
+);
+
+INSERT INTO DIRIGE VALUES (
+    24,
+    'GHI8901NOPQ67890'
+);
+
+INSERT INTO DIRIGE VALUES (
+    25,
+    'HIJ9012QRST67890'
+);
+
+INSERT INTO DIRIGE VALUES (
+    26,
+    'JKL0123UVWX67890'
+);
+
+INSERT INTO DIRIGE VALUES (
+    27,
+    'LMN1234WXYZ67890'
+);
+
+INSERT INTO DIRIGE VALUES (
+    28,
+    'MNO2345ABCD67890'
+);
+
+INSERT INTO DIRIGE VALUES (
+    29,
+    'NOP3456EFGH67890'
+);
+
+INSERT INTO DIRIGE VALUES (
+    30,
+    'PQR4567JKLM67890'
+);
+
+SELECT
+    *
+FROM
+    DIRIGE;
+
+-- INSERT armazena
+
+INSERT INTO ARMAZENA VALUES (
+    'XYZ1234',
+    '12345678000199'
+);
+
+INSERT INTO ARMAZENA VALUES (
+    'ABC5678',
+    '23456789000188'
+);
+
+INSERT INTO ARMAZENA VALUES (
+    'LMN1234',
+    '34567890000177'
+);
+
+INSERT INTO ARMAZENA VALUES (
+    'RST5678',
+    '45678900000166'
+);
+
+INSERT INTO ARMAZENA VALUES (
+    'UVW1234',
+    '56789010000155'
+);
+
+INSERT INTO ARMAZENA VALUES (
+    'XYZ5678',
+    '67890120000144'
+);
+
+INSERT INTO ARMAZENA VALUES (
+    'BCD1234',
+    '78901230000133'
+);
+
+INSERT INTO ARMAZENA VALUES (
+    'FGH5678',
+    '89012340000122'
+);
+
+INSERT INTO ARMAZENA VALUES (
+    'JKL1234',
+    '90123450000111'
+);
+
+INSERT INTO ARMAZENA VALUES (
+    'NOP5678',
+    '01234560000100'
+);
+
+INSERT INTO ARMAZENA VALUES (
+    'XYZ9013',
+    '09876543000111'
+);
+
+INSERT INTO ARMAZENA VALUES (
+    'ABC9013',
+    '98765432000122'
+);
+
+INSERT INTO ARMAZENA VALUES (
+    'DEF9013',
+    '87654321000133'
+);
+
+INSERT INTO ARMAZENA VALUES (
+    'GHI9013',
+    '76543210000144'
+);
+
+INSERT INTO ARMAZENA VALUES (
+    'JKL9013',
+    '65432100000155'
+);
+
+INSERT INTO ARMAZENA VALUES (
+    'MNO9013',
+    '54321000000166'
+);
+
+INSERT INTO ARMAZENA VALUES (
+    'PQR9013',
+    '43210000000177'
+);
+
+INSERT INTO ARMAZENA VALUES (
+    'STU9013',
+    '32100000000188'
+);
+
+INSERT INTO ARMAZENA VALUES (
+    'VWX9013',
+    '21000000000199'
+);
+
+INSERT INTO ARMAZENA VALUES (
+    'YZA9013',
+    '10987654000100'
+);
+
+SELECT
+    *
+FROM
+    ARMAZENA;
+
+-- INSERT trabalha
+
+INSERT INTO TRABALHA VALUES (
+    '12345678000199',
+    1
+);
+
+INSERT INTO TRABALHA VALUES (
+    '23456789000188',
+    2
+);
+
+INSERT INTO TRABALHA VALUES (
+    '34567890000177',
+    3
+);
+
+INSERT INTO TRABALHA VALUES (
+    '45678900000166',
+    4
+);
+
+INSERT INTO TRABALHA VALUES (
+    '56789010000155',
+    5
+);
+
+INSERT INTO TRABALHA VALUES (
+    '67890120000144',
+    6
+);
+
+INSERT INTO TRABALHA VALUES (
+    '78901230000133',
+    7
+);
+
+INSERT INTO TRABALHA VALUES (
+    '89012340000122',
+    8
+);
+
+INSERT INTO TRABALHA VALUES (
+    '90123450000111',
+    9
+);
+
+INSERT INTO TRABALHA VALUES (
+    '01234560000100',
+    10
+);
+
+INSERT INTO TRABALHA VALUES (
+    '09876543000111',
+    21
+);
+
+INSERT INTO TRABALHA VALUES (
+    '98765432000122',
+    22
+);
+
+INSERT INTO TRABALHA VALUES (
+    '87654321000133',
+    23
+);
+
+INSERT INTO TRABALHA VALUES (
+    '76543210000144',
+    24
+);
+
+INSERT INTO TRABALHA VALUES (
+    '65432100000155',
+    25
+);
+
+INSERT INTO TRABALHA VALUES (
+    '54321000000166',
+    26
+);
+
+INSERT INTO TRABALHA VALUES (
+    '43210000000177',
+    27
+);
+
+INSERT INTO TRABALHA VALUES (
+    '32100000000188',
+    28
+);
+
+INSERT INTO TRABALHA VALUES (
+    '21000000000199',
+    29
+);
+
+INSERT INTO TRABALHA VALUES (
+    '10987654000100',
+    30
+);
+
+SELECT
+    *
+FROM
+    TRABALHA;
+
+-- INSERT possui
+
+INSERT INTO POSSUI VALUES (
+    '12345678000199',
+    1
+);
+
+INSERT INTO POSSUI VALUES (
+    '23456789000188',
+    2
+);
+
+INSERT INTO POSSUI VALUES (
+    '34567890000177',
+    3
+);
+
+INSERT INTO POSSUI VALUES (
+    '45678900000166',
+    4
+);
+
+INSERT INTO POSSUI VALUES (
+    '56789010000155',
+    5
+);
+
+INSERT INTO POSSUI VALUES (
+    '67890120000144',
+    6
+);
+
+INSERT INTO POSSUI VALUES (
+    '78901230000133',
+    7
+);
+
+INSERT INTO POSSUI VALUES (
+    '89012340000122',
+    8
+);
+
+INSERT INTO POSSUI VALUES (
+    '90123450000111',
+    9
+);
+
+INSERT INTO POSSUI VALUES (
+    '01234560000100',
+    10
+);
+
+INSERT INTO POSSUI VALUES (
+    '09876543000111',
+    11
+);
+
+INSERT INTO POSSUI VALUES (
+    '98765432000122',
+    12
+);
+
+INSERT INTO POSSUI VALUES (
+    '87654321000133',
+    13
+);
+
+INSERT INTO POSSUI VALUES (
+    '76543210000144',
+    14
+);
+
+INSERT INTO POSSUI VALUES (
+    '65432100000155',
+    15
+);
+
+INSERT INTO POSSUI VALUES (
+    '54321000000166',
+    16
+);
+
+INSERT INTO POSSUI VALUES (
+    '43210000000177',
+    17
+);
+
+INSERT INTO POSSUI VALUES (
+    '32100000000188',
+    18
+);
+
+INSERT INTO POSSUI VALUES (
+    '21000000000199',
+    19
+);
+
+INSERT INTO POSSUI VALUES (
+    '10987654000100',
+    20
+);
+
+SELECT
+    *
+FROM
+    POSSUI;
+
+-- INSERT pedido_forma_pagamento
+
+INSERT INTO PEDIDO_FORMA_PAGAMENTO VALUES (
+    1,
+    1
+);
+
+INSERT INTO PEDIDO_FORMA_PAGAMENTO VALUES (
+    2,
+    2
+);
+
+INSERT INTO PEDIDO_FORMA_PAGAMENTO VALUES (
+    3,
+    3
+);
+
+INSERT INTO PEDIDO_FORMA_PAGAMENTO VALUES (
+    4,
+    4
+);
+
+INSERT INTO PEDIDO_FORMA_PAGAMENTO VALUES (
+    5,
+    5
+);
+
+INSERT INTO PEDIDO_FORMA_PAGAMENTO VALUES (
+    6,
+    6
+);
+
+INSERT INTO PEDIDO_FORMA_PAGAMENTO VALUES (
+    7,
+    7
+);
+
+INSERT INTO PEDIDO_FORMA_PAGAMENTO VALUES (
+    8,
+    8
+);
+
+INSERT INTO PEDIDO_FORMA_PAGAMENTO VALUES (
+    9,
+    9
+);
+
+INSERT INTO PEDIDO_FORMA_PAGAMENTO VALUES (
+    10,
+    10
+);
+
+INSERT INTO PEDIDO_FORMA_PAGAMENTO VALUES (
+    11,
+    11
+);
+
+INSERT INTO PEDIDO_FORMA_PAGAMENTO VALUES (
+    12,
+    12
+);
+
+INSERT INTO PEDIDO_FORMA_PAGAMENTO VALUES (
+    13,
+    13
+);
+
+INSERT INTO PEDIDO_FORMA_PAGAMENTO VALUES (
+    14,
+    14
+);
+
+INSERT INTO PEDIDO_FORMA_PAGAMENTO VALUES (
+    15,
+    15
+);
+
+INSERT INTO PEDIDO_FORMA_PAGAMENTO VALUES (
+    16,
+    16
+);
+
+INSERT INTO PEDIDO_FORMA_PAGAMENTO VALUES (
+    17,
+    17
+);
+
+INSERT INTO PEDIDO_FORMA_PAGAMENTO VALUES (
+    18,
+    18
+);
+
+INSERT INTO PEDIDO_FORMA_PAGAMENTO VALUES (
+    19,
+    19
+);
+
+INSERT INTO PEDIDO_FORMA_PAGAMENTO VALUES (
+    20,
+    20
+);
+
+SELECT
+    *
+FROM
+    PEDIDO_FORMA_PAGAMENTO;
+
+-- INSERT servico_realizado
+
+INSERT INTO SERVICO_REALIZADO VALUES (
+    1,
+    'Troca de �leo',
+    150.00,
+    1,
+    1
+);
+
+INSERT INTO SERVICO_REALIZADO VALUES (
+    2,
+    'Troca de pastilhas de freio',
+    250.00,
+    2,
+    2
+);
+
+INSERT INTO SERVICO_REALIZADO VALUES (
+    3,
+    'Troca de correia dentada',
+    300.00,
+    3,
+    3
+);
+
+INSERT INTO SERVICO_REALIZADO VALUES (
+    4,
+    'Substitui��o de amortecedor',
+    450.00,
+    4,
+    4
+);
+
+INSERT INTO SERVICO_REALIZADO VALUES (
+    5,
+    'Troca de velas de igni��o',
+    100.00,
+    5,
+    5
+);
+
+INSERT INTO SERVICO_REALIZADO VALUES (
+    6,
+    'Substitui��o do disco de freio',
+    200.00,
+    6,
+    6
+);
+
+INSERT INTO SERVICO_REALIZADO VALUES (
+    7,
+    'Troca de filtro de ar',
+    50.00,
+    7,
+    7
+);
+
+INSERT INTO SERVICO_REALIZADO VALUES (
+    8,
+    'Instala��o de bateria',
+    500.00,
+    8,
+    8
+);
+
+INSERT INTO SERVICO_REALIZADO VALUES (
+    9,
+    'Troca de radiador',
+    600.00,
+    9,
+    9
+);
+
+INSERT INTO SERVICO_REALIZADO VALUES (
+    10,
+    'Substitui��o de pneus',
+    800.00,
+    10,
+    10
+);
+
+INSERT INTO SERVICO_REALIZADO VALUES (
+    11,
+    'Troca de �leo',
+    150.00,
+    11,
+    11
+);
+
+INSERT INTO SERVICO_REALIZADO VALUES (
+    12,
+    'Troca de pastilhas de freio',
+    250.00,
+    12,
+    12
+);
+
+INSERT INTO SERVICO_REALIZADO VALUES (
+    13,
+    'Troca de correia dentada',
+    300.00,
+    13,
+    13
+);
+
+INSERT INTO SERVICO_REALIZADO VALUES (
+    14,
+    'Substitui��o de amortecedor',
+    450.00,
+    14,
+    14
+);
+
+INSERT INTO SERVICO_REALIZADO VALUES (
+    15,
+    'Troca de velas de igni��o',
+    100.00,
+    15,
+    15
+);
+
+INSERT INTO SERVICO_REALIZADO VALUES (
+    16,
+    'Substitui��o do disco de freio',
+    200.00,
+    16,
+    16
+);
+
+INSERT INTO SERVICO_REALIZADO VALUES (
+    17,
+    'Troca de filtro de ar',
+    50.00,
+    17,
+    17
+);
+
+INSERT INTO SERVICO_REALIZADO VALUES (
+    18,
+    'Instala��o de bateria',
+    500.00,
+    18,
+    18
+);
+
+INSERT INTO SERVICO_REALIZADO VALUES (
+    19,
+    'Troca de radiador',
+    600.00,
+    19,
+    19
+);
+
+INSERT INTO SERVICO_REALIZADO VALUES (
+    20,
+    'Substitui��o de pneus',
+    800.00,
+    20,
+    20
+);
+
+SELECT
+    *
+FROM
+    SERVICO_REALIZADO;
+
+-- REL�TORIOS
+
+SELECT
+    CPF_CLIE  "CPF",
+    NOME_CLIE "NOME"
+FROM
+    CLIENTE
+ORDER BY
+    NOME_CLIE ASC;
+
+SELECT
+    PLACA_CAR "PLACA",
+    MARCA_CAR "MARCA"
+FROM
+    CARRO
+ORDER BY
+    PLACA_CAR ASC;
+
+SELECT
+    COUNT(CPF_CLIE) "CLIENTES"
+FROM
+    CLIENTE;
+
+SELECT
+    COUNT(PLACA_CAR) "CARROS"
+FROM
+    CARRO;
+
+SELECT
+    *
+FROM
+    MOTORISTA
+WHERE
+    SALARIO_MOT >= 4000;
+
+SELECT
+    *
+FROM
+    SERVICO_REALIZADO
+WHERE
+    VALOR_SERV >= 300
+    AND VALOR_SERV <= 800;
+
+SELECT
+    ID_FP           "ID",
+    VALOR_FP        "VALOR",
+    VALOR_FP * 0.99 "VALOR TAXADO"
+FROM
+    FORMA_PAG;
+
+SELECT
+    NOME_MOT          "NOME",
+    SALARIO_MOT       "SALARIO",
+    SALARIO_MOT * 1.1 "SALARIO COM BONUS"
+FROM
+    MOTORISTA;
+
+SELECT
+    SUM(SALARIO_MOT) "SALARIO TOTAL"
+FROM
+    MOTORISTA;
+
+SELECT
+    MAX(VALOR_FP) "MAIOR VALO PAGO"
+FROM
+    FORMA_PAG;
+
+SELECT
+    MIN(VALOR_FP) "MENOR VALO PAGO"
+FROM
+    FORMA_PAG;
+
+SELECT
+    *
+FROM
+    DIAGNOSTICO
+WHERE
+    STATUS_DIA IN ('Conclu�do', 'Em andamento')
+ORDER BY
+    STATUS_DIA DESC;
+
+SELECT
+    ID_END     "ID",
+    NUMERO_END "NUMERO",
+    ESTADO_END "ESTADO"
+FROM
+    ENDERECO
+WHERE
+    ESTADO_END IN ('S�o Paulo', 'Rio de Janeiro', 'Minas Gerais');
+
+SELECT
+    NOME_CLIE "CLIENTE",
+    PLACA_CAR "PLACA"
+FROM
+    CLIENTE,
+    CARRO
+WHERE
+    NOME_CLIE LIKE 'R%'
+    AND PLACA_CAR LIKE 'R%';
+
+SELECT
+    TIPO_PED   "TIPO",
+    NOME_PECA  "NOME PE�A",
+    PRECO_PECA "PRE�O"
+FROM
+    PEDIDO,
+    PECA
+WHERE
+    TIPO_PED IN ('Pe�a')
+    AND NUM_PED = ID_PECA;
+
+-- COMMIT
+
+COMMIT;
